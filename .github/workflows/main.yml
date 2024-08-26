@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main  # Replace with your default branch or other branches to monitor
+  workflow_dispatch:  # Add this line to enable manual triggering
 
 jobs:
   build:
