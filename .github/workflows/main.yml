@@ -1,0 +1,17 @@
+name: Test Pipeline
+
+on:
+  push:
+    branches:
+      - main  # Replace with your default branch or other branches to monitor
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Display message
+      run: echo "code pushed"
