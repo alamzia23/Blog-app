@@ -1,0 +1,11 @@
+BlogDeployment:
+  name: my-app-deployment
+  replicas: 1
+  app: my-backend-app
+  image:
+    repository: 590183982624.dkr.ecr.us-east-1.amazonaws.com/alamzia23repo
+    tag: refs/tags/v1.0.2
+servicefile:
+  name: backend-service
+  app: my-backend-app
+  type: LoadBalancer
