@@ -11,12 +11,12 @@
   --font-size-xl: clamp(2.44rem, 2.38vw + 1.85rem, 3.75rem);
   --border-radius: 10px;
 }
-
+/* #FAF5EE  #FAF5EE */
 body {
   font-family: 'Poppins', sans-serif;
   color: var(--black);
   font-size: var(--font-size-base);
-  background-color: #FAF5EE;
+  background-color: #FAF5EE;       
   background-image: url("/img/img-noise-361x370.png");
   margin: 0;
 }
