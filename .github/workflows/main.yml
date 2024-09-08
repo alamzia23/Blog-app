@@ -39,6 +39,8 @@ jobs:
       - name: Store GitHub Ref in Temp Variable
         id: store-ref
         run: echo "::set-output name=tag::${{ github.ref }}"
+      - name: Display Initial values.yaml
+        run: cat values.yaml  # Display the initial contents of values.yaml
       - name: Update Image Version in the related HelmChart values.yaml
         uses: fjogeleit/yaml-update-action@main
         with:
@@ -49,8 +51,8 @@ jobs:
           targetBranch: main
           createPR: false
           message: 'Update Image Version to ${{ steps.store-ref.outputs.tag }}'
-      - name: Check Updated values.yaml
-        run: cat values.yaml
+      - name: Display Updated values.yaml
+        run: cat values.yaml  # Display the updated contents of values.yaml
       - name: setting auth
         uses: actions/github-script@v5
         with:
