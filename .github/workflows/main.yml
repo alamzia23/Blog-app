@@ -49,6 +49,8 @@ jobs:
           targetBranch: main
           createPR: false
           message: 'Update Image Version to ${{ steps.store-ref.outputs.tag }}'
+      - name: Check Updated values.yaml
+        run: cat values.yaml
       - name: setting auth
         uses: actions/github-script@v5
         with:
