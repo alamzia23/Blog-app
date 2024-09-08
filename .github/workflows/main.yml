@@ -59,3 +59,5 @@ jobs:
             github-token: ${{ secrets.TOKEN }}
             script: |
                console.log('Setting authentication');
+      - name: Display Updated values.yaml
+        run: cat values.yaml
