@@ -33,9 +33,10 @@ jobs:
              docker push ${{ secrets.AWS_REGISTRY_URL }}:${TAG}
              echo "::set-output name=image::${{ secrets.AWS_REGISTRY_URL }}/frontend:${TAG}"
       - name: Checkout Helm Chart Repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: alamzia23/Blog-app-helmChart
+          token: ${{secrets.TOKEN}}
       - name: Store GitHub Ref in Temp Variable
         id: store-ref
         run: echo "::set-output name=tag::${{ github.ref }}"
@@ -61,11 +62,12 @@ jobs:
                console.log('Setting authentication');
       - name: commit and push
         run: |
-          gh auth login --with-token ${{secrets.TOKEN}}
-          git remote set-url https://github.com/alamzia23/Blog-app-helmChart
-          git add values.yaml
-          git commit -m "Update of helm charts"
-          git push origin main
+         echo "Making chnages..."
+         git config user.name "github-actions[bot]"
+         git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+         git add values.yaml
+         git commit -m "Update of helm charts"
+         git push origin main
 
       - name: Display Updated values.yaml
         run: cat values.yaml
