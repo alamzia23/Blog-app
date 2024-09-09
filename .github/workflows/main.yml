@@ -61,10 +61,7 @@ jobs:
                console.log('Setting authentication');
       - name: commit and push
         run: |
-          git config user.name "alamzia23"
-          git config user.email "alamziya.fzd@gmail.com"
-          git add values.yaml
-          git commit -m "update to new helm chart" 
+          gh auth status
       - name: Push Changes
         run: |
           git push
