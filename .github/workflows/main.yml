@@ -61,8 +61,6 @@ jobs:
                console.log('Setting authentication');
       - name: commit and push
         run: |
-          # git config user.name "github-actions[bot]"
-          # git config user.email "github-actions[bot]@users.noreply.github.com"
           gh auth login --with-token ${{secrets.TOKEN}}
           git remote set-url https://github.com/alamzia23/Blog-app-helmChart
           git add values.yaml
