@@ -45,6 +45,14 @@ app.locals.isActiveRoute = isActiveRoute;
 app.use('/', require('./server/routes/main'));
 app.use('/', require('./server/routes/admin'));
 
+// Readiness probe endpoint
+
+
+
 app.listen(PORT, ()=> {
   console.log(`App listening on port ${PORT}`);
+});
+app.get('/healthz', (req, res) => {
+  // Simple health check to ensure the app is up and running
+  res.status(200).send('OK');
 });
