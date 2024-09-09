@@ -60,6 +60,6 @@ jobs:
             script: |
                console.log('Setting authentication');
       - name: commit and push
-        run: git config user.email "alamziya.fzd@gmail.com" && git config user.name "alamzia23" && git commit -m "update to new helm chart" && git push https://alamzia23:${{secrets.TOKEN}}@github.com/Blog-app-helmChart
+        run: git config user.email "alamziya.fzd@gmail.com" && git config user.name "alamzia23" && git add values.yaml && git commit -m "update to new helm chart" && git push https://alamzia23:${{secrets.TOKEN}}@github.com/Blog-app-helmChart
       - name: Display Updated values.yaml
         run: cat values.yaml
