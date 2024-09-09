@@ -25,7 +25,7 @@ jobs:
       - name: Login into Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
-      - name: Build and Push Frontend Docker Image
+      - name: Build and Push Docker Image
         id: build-and-push-frontend
         run: |
              TAG=$(echo "${{ github.ref }}" | sed 's|refs/tags/||')
