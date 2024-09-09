@@ -12,6 +12,11 @@ const { isActiveRoute } = require('./server/helpers/routeHelpers');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+app.get('/healthz', (req, res) => {
+  // Simple health check to ensure the app is up and running
+  res.status(200).send('OK');
+});
   
 // Connect to DB
 connectDB();
@@ -51,8 +56,4 @@ app.use('/', require('./server/routes/admin'));
 
 app.listen(PORT, ()=> {
   console.log(`App listening on port ${PORT}`);
-});
-app.get('/healthz', (req, res) => {
-  // Simple health check to ensure the app is up and running
-  res.status(200).send('OK');
 });
