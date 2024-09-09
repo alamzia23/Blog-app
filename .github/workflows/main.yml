@@ -61,11 +61,13 @@ jobs:
                console.log('Setting authentication');
       - name: commit and push
         run: |
-          gh auth status
-      - name: Push Changes
-        run: |
-          git push
-        env:
-          GITHUB_TOKEN: ${{secrets.TOKEN}}
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          gh auth login --with-token ${{secrets.TOKEN}}
+          git remote set-url https://github.com/alamzia23/Blog-app-helmChart
+          git add values.yaml
+          git commit -m "Update of helm charts"
+          git push origin main
+
       - name: Display Updated values.yaml
         run: cat values.yaml
