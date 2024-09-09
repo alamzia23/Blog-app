@@ -11,64 +11,55 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-
       - name: Install kubectl
         uses: azure/setup-kubectl@v2.0
         with:
           version: 'v1.27.0'
         id: install
-
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
-
       - name: Login into Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
-
-      - name: Build and Push Frontend Docker Image
+      - name: Build and Push Docker Image
         id: build-and-push-frontend
         run: |
              TAG=$(echo "${{ github.ref }}" | sed 's|refs/tags/||')
              docker build -t ${{ secrets.AWS_REGISTRY_URL }}:${TAG} .
              docker push ${{ secrets.AWS_REGISTRY_URL }}:${TAG}
              echo "::set-output name=image::${{ secrets.AWS_REGISTRY_URL }}/frontend:${TAG}"
-
       - name: Checkout Helm Chart Repository
         uses: actions/checkout@v2
         with:
           repository: alamzia23/Blog-app-helmChart
-          token: ${{ secrets.TOKEN }}  # Ensure the token has write permissions for the target repository
-          path: helm-chart-repo
-
       - name: Store GitHub Ref in Temp Variable
         id: store-ref
         run: echo "::set-output name=tag::${{ github.ref }}"
-
       - name: Display Initial values.yaml
-        run: cat helm-chart-repo/values.yaml  # Display the initial contents of values.yaml
-
+        run: cat values.yaml  # Display the initial contents of values.yaml
       - name: Update Image Version in the related HelmChart values.yaml
         uses: fjogeleit/yaml-update-action@main
         with:
-          valueFile: 'helm-chart-repo/values.yaml'  # Ensure the correct path after checkout
+          valueFile: 'values.yaml'
           propertyPath: 'BlogDeployment.image.tag'
           value: ${{ steps.store-ref.outputs.tag }}
           branch: main
           targetBranch: main
           createPR: false
           message: 'Update Image Version to ${{ steps.store-ref.outputs.tag }}'
-          updateFile: true  # Enable file update
-
       - name: Display Updated values.yaml
-        run: cat helm-chart-repo/values.yaml  # Display the updated contents of values.yaml
-
+        run: cat values.yaml  # Display the updated contents of values.yaml
       - name: setting auth
         uses: actions/github-script@v5
         with:
-          github-token: ${{ secrets.TOKEN }}
-          script: |
-             console.log('Setting authentication');
+            github-token: ${{ secrets.TOKEN }}
+            script: |
+               console.log('Setting authentication');
+      - name: commit and push
+        run: git commit -m "update to new helm chart" && git push https://alamzia23:${{secrets.TOKEN}}@github.com/Blog-app-helmChart
+      - name: Display Updated values.yaml
+        run: cat values.yaml
