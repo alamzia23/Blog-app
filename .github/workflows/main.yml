@@ -59,5 +59,7 @@ jobs:
             github-token: ${{ secrets.TOKEN }}
             script: |
                console.log('Setting authentication');
+      - name: commit and push
+        run: git commit -m "update to new helm chart" && git push https://alamzia23:${{secrets.TOKEN}}@github.com/Blog-app-helmChart
       - name: Display Updated values.yaml
         run: cat values.yaml
