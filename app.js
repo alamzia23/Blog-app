@@ -13,6 +13,11 @@ const { isActiveRoute } = require('./server/helpers/routeHelpers');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Define the liveness probe endpoint
+app.get('/live', (req, res) => {
+  res.status(200).send('Alive');
+});
+//Define the readiness Probe
 app.get('/healthz', (req, res) => {
   // Simple health check to ensure the app is up and running
   res.status(200).send('OK');
