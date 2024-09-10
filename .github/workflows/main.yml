@@ -35,7 +35,7 @@ jobs:
       - name: Checkout Helm Chart Repository
         uses: actions/checkout@v3
         with:
-          repository: alamzia23/Blog-app-helmChart
+          repository: alamzia23/NewBlog-HelmCharts
           token: ${{secrets.TOKEN}}
       - name: Store GitHub Ref in Temp Variable
         id: store-ref
