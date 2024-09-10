@@ -39,7 +39,9 @@ jobs:
           token: ${{secrets.TOKEN}}
       - name: Store GitHub Ref in Temp Variable
         id: store-ref
-        run: echo "::set-output name=tag::${{ github.ref }}"
+        run: |
+          TAG=$(echo "${GITHUB_REF}" | sed 's|refs/tags/||')
+          echo "tag=${TAG}" >> $GITHUB_OUTPUT
       - name: Display Initial values.yaml
         run: cat values.yaml  # Display the initial contents of values.yaml
       - name: Update Image Version in the related HelmChart values.yaml
@@ -62,12 +64,11 @@ jobs:
                console.log('Setting authentication');
       - name: commit and push
         run: |
-         echo "Making chnages..."
+         echo "Making changes..."
          git config user.name "github-actions[bot]"
          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
          git add values.yaml
          git commit -m "Update of helm charts"
          git push origin main
-
       - name: Display Updated values.yaml
         run: cat values.yaml
