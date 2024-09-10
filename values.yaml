@@ -4,8 +4,15 @@ BlogDeployment:
   app: my-backend-app
   image:
     repository: 590183982624.dkr.ecr.us-east-1.amazonaws.com/alamzia23repo
-    tag: v5.0.4
+    tag: v5.0.5
 servicefile:
   name: backend-service
   app: my-backend-app
   type: LoadBalancer
+Secrets:
+  name: my-app-secrets
+  type: Opaque
+readinessProbe:
+  port: 5000
+livenessProbe:
+  port: 5000
