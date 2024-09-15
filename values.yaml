@@ -4,7 +4,7 @@ BlogDeployment:
   app: my-backend-app
   image:
     repository: 590183982624.dkr.ecr.us-east-1.amazonaws.com/alamzia23repo
-    tag: v5.0.6
+    tag: v5.0.7
 servicefile:
   name: backend-service
   app: my-backend-app
