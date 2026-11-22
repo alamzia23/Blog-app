@@ -1,74 +1,68 @@
-name: Build and Push Docker Images
+name: Build and publish blog image
+
 on:
   push:
     tags:
       - 'v[0-9]+.[0-9]+.[0-9]+'
+
 permissions:
-  contents: write
+  contents: read
+
 jobs:
-  build-and-push:
+  build-and-publish:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Install kubectl
-        uses: azure/setup-kubectl@v2.0
-        with:
-          version: 'v1.27.0'
-        id: install
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
+      - name: Check out application
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
-      - name: Login into Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
-      - name: Build and Push Docker Image
-        id: build-and-push-frontend
+
+      - name: Log in to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push image
+        env:
+          IMAGE_REPOSITORY: ${{ secrets.AWS_REGISTRY_URL }}
+          IMAGE_TAG: ${{ github.ref_name }}
         run: |
-             TAG=$(echo "${{ github.ref }}" | sed 's|refs/tags/||')
-             docker build -t ${{ secrets.AWS_REGISTRY_URL }}:${TAG} .
-             docker push ${{ secrets.AWS_REGISTRY_URL }}:${TAG}
-             echo "::set-output name=image::${{ secrets.AWS_REGISTRY_URL }}/frontend:${TAG}"
-      - name: Checkout Helm Chart Repository
-        uses: actions/checkout@v3
+          set -euo pipefail
+          docker build --tag "${IMAGE_REPOSITORY}:${IMAGE_TAG}" .
+          docker push "${IMAGE_REPOSITORY}:${IMAGE_TAG}"
+
+      - name: Check out Helm chart repository
+        uses: actions/checkout@v4
         with:
           repository: alamzia23/NewBlog-HelmCharts
-          token: ${{secrets.TOKEN}}
-      - name: Store GitHub Ref in Temp Variable
-        id: store-ref
+          token: ${{ secrets.TOKEN }}
+          path: chart
+
+      - name: Update chart image and push desired state
+        env:
+          IMAGE_REPOSITORY: ${{ secrets.AWS_REGISTRY_URL }}
+          IMAGE_TAG: ${{ github.ref_name }}
         run: |
-          TAG=$(echo "${GITHUB_REF}" | sed 's|refs/tags/||')
-          echo "tag=${TAG}" >> $GITHUB_OUTPUT
-      - name: Display Initial values.yaml
-        run: cat values.yaml  # Display the initial contents of values.yaml
-      - name: Update Image Version in the related HelmChart values.yaml
-        uses: fjogeleit/yaml-update-action@main
-        with:
-          valueFile: 'values.yaml'
-          propertyPath: 'BlogDeployment.image.tag'
-          value: ${{ steps.store-ref.outputs.tag }}
-          branch: main
-          targetBranch: main
-          createPR: false
-          message: 'Update Image Version to ${{ steps.store-ref.outputs.tag }}'
-      - name: Display Updated values.yaml
-        run: cat values.yaml  # Display the updated contents of values.yaml
-      - name: setting auth
-        uses: actions/github-script@v5
-        with:
-            github-token: ${{ secrets.TOKEN }}
-            script: |
-               console.log('Setting authentication');
-      - name: commit and push
-        run: |
-         echo "Making changes..."
-         git config user.name "github-actions[bot]"
-         git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-         git add values.yaml
-         git commit -m "Update of helm charts"
-         git push origin main
-      - name: Display Updated values.yaml
-        run: cat values.yaml
+          set -euo pipefail
+          cd chart
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          import re
+
+          path = Path("values.yaml")
+          text = path.read_text()
+          text, repo_count = re.subn(r"(?m)^(    repository: ).+$", lambda m: m.group(1) + os.environ["IMAGE_REPOSITORY"], text, count=1)
+          text, tag_count = re.subn(r"(?m)^(    tag: ).+$", lambda m: m.group(1) + os.environ["IMAGE_TAG"], text, count=1)
+          if repo_count != 1 or tag_count != 1:
+              raise SystemExit("Expected one image repository and tag entry under BlogDeployment.image")
+          path.write_text(text)
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+users.noreply.github.com"
+          git add values.yaml
+          git commit -m "Update blog image to ${IMAGE_TAG}"
+          git push origin HEAD:main

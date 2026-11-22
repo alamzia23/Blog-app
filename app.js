@@ -12,6 +12,10 @@ const { isActiveRoute } = require('./server/helpers/routeHelpers');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+const sessionSecret = process.env.SESSION_SECRET;
+if (!process.env.MONGODB_URI || !process.env.JWT_SECRET || !sessionSecret) {
+  throw new Error('MONGODB_URI, JWT_SECRET, and SESSION_SECRET must be configured');
+}
 
 // Define the liveness probe endpoint
 app.get('/live', (req, res) => {
@@ -32,7 +36,7 @@ app.use(cookieParser());
 app.use(methodOverride('_method'));
 
 app.use(session({
-  secret: process.env.SESSION_SECRET,
+  secret: sessionSecret,
   resave: false,
   saveUninitialized: true,
   store: MongoStore.create({
